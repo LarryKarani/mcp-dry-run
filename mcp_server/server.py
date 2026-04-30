@@ -9,6 +9,7 @@ this folder and point app.config.MCP_SERVER_URL at the URL they give you.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import Annotated
 
@@ -20,7 +21,11 @@ from mcp_server import data
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s | %(message)s")
 log = logging.getLogger("acme-mcp")
 
-mcp = FastMCP("acme-coffee")
+# Bind to 127.0.0.1:8000 by default (local dev). On Railway / any container
+# host, set HOST=0.0.0.0 and let the platform inject PORT.
+_HOST = os.environ.get("HOST", "127.0.0.1")
+_PORT = int(os.environ.get("PORT", "8000"))
+mcp = FastMCP("acme-coffee", host=_HOST, port=_PORT)
 
 # Email regex — keep it simple, the LLM is not the validator of last resort.
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
@@ -142,5 +147,5 @@ def cancel_order(
 
 if __name__ == "__main__":
     # Streamable HTTP transport on port 8765. The agent connects to /mcp.
-    log.info("Starting Acme Coffee MCP server on http://127.0.0.1:8765/mcp")
+    log.info("Starting Acme Coffee MCP server on http://%s:%d/mcp", _HOST, _PORT)
     mcp.run(transport="streamable-http")
