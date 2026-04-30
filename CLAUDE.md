@@ -4,6 +4,33 @@
 
 ---
 
+## 0. Reuse strategy — bootcamp day vs. dry run
+
+**This repo is a working dry-run build. On bootcamp day, REUSE IT — do not start from scratch.** The infrastructure took 3 hours to get right; you don't have time to redo it. Fork or clone this repo, then follow `BOOTCAMP_DAY.md` for the migration playbook.
+
+**Files to keep verbatim** (domain-agnostic):
+- `Dockerfile`, `railway.json`, `.dockerignore`, `.gitignore`
+- `requirements.txt`, `pytest.ini`, `.coveragerc`
+- `app/config.py`, `app/llm.py`, `app/mcp_client.py`, `app/observability.py`, `app/agent.py`, `app/smoke.py`, `app/ui_chainlit.py`
+- The *shape* of `tests/conftest.py`, `tests/test_guardrails.py`, `tests/test_eval.py`
+
+**Files to rewrite for the new domain:**
+- `app/prompts/system_v1.md` (and bump `current.py` back to v1 — you're starting fresh)
+- `prompts_log.md` (wipe; keep the format, restart at v1)
+- `app/guardrails.py::_PROMPT_LEAK_FRAGMENTS` (refresh phrase list)
+- `tests/test_agent_happy.py`, `tests/test_agent_edges.py` (replace H/E scenarios)
+- `chainlit.md`, `README.md`, `docs/architecture.md`, `docs/decisions.md`, `docs/limitations.md`
+
+**Files to delete:**
+- `mcp_server/` (the dry-run's local Acme server — bootcamp uses a hosted MCP).
+- `DRY_RUN_SCENARIO.md`, `KICKOFF.md` (replace with the bootcamp brief).
+
+**One env-var change:**
+- `MCP_SERVER_URL` → bootcamp-provided URL.
+- `MCP_TRANSPORT` → `http` or `sse`, whichever they specify.
+
+---
+
 ## 1. Mission
 
 Build a **production-ready AI chatbot that consumes an MCP server** to solve real business scenarios. The MCP server URL/spec will be provided at the start of the bootcamp session — **do not hardcode tool names**. Discover tools dynamically via the MCP protocol.
@@ -284,15 +311,26 @@ Use `MemorySaver` checkpointer keyed by Chainlit session ID so multi-turn contex
 |---|---|---|
 | 0:00–0:15 | Read MCP server docs, fill in success criteria, scaffold repo | Repo exists, env vars set, MCP server pingable |
 | 0:15–0:30 | Tool discovery proof + first agent turn working | One MCP tool successfully called from a script |
-| 0:30–0:45 | **🎥 VIDEO 1** | Approach, architecture, success criteria |
+| 0:30–0:45 | **🎥 VIDEO 1 — HARD STOP. Claude must prompt user to record before continuing.** | Approach, architecture, success criteria |
 | 0:45–1:30 | Agent + Chainlit UI + happy-path tests passing | Working chatbot, 1st prompt version, 5+ tests green |
 | 1:30–1:50 | Guardrails + edge case tests + 2nd prompt iteration | Adversarial suite running, prompts_log.md updated |
-| 1:50–2:00 | **🎥 VIDEO 2** | Mid-build progress, decisions, obstacles |
+| 1:50–2:00 | **🎥 VIDEO 2 — HARD STOP. Claude must prompt user to record before continuing.** | Mid-build progress, decisions, obstacles |
 | 2:00–2:30 | Deploy to Railway + smoke test on prod URL | Public URL works |
 | 2:30–2:45 | Eval section: run suite against 2 models, write up conclusions | docs/decisions.md updated with eval results |
-| 2:45–3:00 | **🎥 VIDEO 3** + final polish + submission | Submitted on time |
+| 2:45–3:00 | **🎥 VIDEO 3 — HARD STOP. Claude must prompt user to record.** + final polish + submission | Submitted on time |
 
 > If you're behind at 1:30, **cut the eval comparison** (do it with one model only) before cutting tests or deploy. Tests + deploy are graded heavier than eval depth.
+
+### Video checkpoint enforcement (NON-NEGOTIABLE for Claude)
+
+When the workflow reaches a 🎥 marker, Claude MUST:
+
+1. **Stop all further work.** Do not start the next phase.
+2. **Run the pre-recording verification commands from `VIDEO_CHECKPOINTS.md`** (e.g. `pytest -q`, `ruff check`, the discovery one-liner) and paste the output.
+3. **Explicitly prompt the user**, e.g.: *"🎥 Phase A is complete. Stop here and record Video 1 now (3–5 min). Verify items: [list from VIDEO_CHECKPOINTS.md]. Reply 'recorded' or 'skip' before I move on."*
+4. **Wait for the user to confirm** the video is recorded (or explicitly say skip). Do not proceed otherwise — even if the user asks to.
+
+This applies to the dry run AND bootcamp day. The dry run revealed it's easy to skip videos when you're chasing a green test suite; this rule prevents that.
 
 ---
 

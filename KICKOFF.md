@@ -1,6 +1,8 @@
 # KICKOFF.md — How to drive Claude Code through this dry run
 
 > Goal: end up with a complete, deployed, tested project that mirrors what you'll need on bootcamp day. Every choice and shortcut you take here is one less you have to figure out under pressure.
+>
+> **For the real bootcamp run, do not follow this file — follow `BOOTCAMP_DAY.md` instead.** This file is for the *dry run* only. Bootcamp day is about reusing the dry-run repo, not redoing it.
 
 ---
 

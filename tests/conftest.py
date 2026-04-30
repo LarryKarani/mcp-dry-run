@@ -1,62 +1,57 @@
-"""Test fixtures.
+"""Test fixtures for the Meridian Electronics MCP chatbot.
 
-Strategy:
-* Spin up the Acme MCP server in-process on a free port (uvicorn in a daemon
-  thread). Tests get real tool discovery + real round-trips, but no external
-  process to manage.
-* Reset MCP server state between tests so order/inventory mutations don't leak.
-* `FakeAgentModel` lets agent tests run without API calls — it cycles through
-  pre-canned `AIMessage` objects (including tool_calls) and overrides
-  `bind_tools` to be a no-op (`create_agent` calls `model.bind_tools(tools)`).
+Two tool-list flavors:
+
+* `mcp_tools_real` (session-scoped) hits the hosted MCP for discovery so we
+  can verify schema/description integrity in `test_mcp_client.py`. Read-only.
+* `mock_tools` builds permissive-schema stubs in-process — used by every
+  agent test so happy/edge scenarios run hermetically without polluting the
+  hosted MCP with test orders.
 """
 from __future__ import annotations
 
 import os
-import socket
-import threading
-import time
-from collections.abc import Iterator
 from typing import Any
 
 import pytest
-import uvicorn
 from langchain_core.language_models.fake_chat_models import FakeMessagesListChatModel
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
+from langchain_core.tools import BaseTool, StructuredTool
+from pydantic import BaseModel, ConfigDict
 
-# --- Make sure the agent talks to OUR test server, not whatever .env points to.
-# Must happen before any `app.*` import that reads settings.
-_TEST_PORT = 0  # set in `_pick_free_port` below
-
-
-def _pick_free_port() -> int:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-
-
-_TEST_PORT = _pick_free_port()
-os.environ["MCP_SERVER_URL"] = f"http://127.0.0.1:{_TEST_PORT}/mcp"
-os.environ["MCP_TRANSPORT"] = "http"
-# Tests must never accidentally hit a real LLM provider.
-os.environ.setdefault("LLM_PROVIDER", "openrouter")
+# Tests must never accidentally hit a real LLM provider. The eval suite reads
+# the real key from .env directly (see tests/test_eval.py::_load_real_api_key).
 os.environ.setdefault("OPENROUTER_API_KEY", "sk-test-not-used")
 os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
 
-from app.config import get_settings  # noqa: E402  — env must be set first
-from mcp_server import data as mcp_data  # noqa: E402
-from mcp_server.server import mcp as mcp_app  # noqa: E402
+# Real Meridian tool names. Tests are allowed to reference them; the rule is
+# that `app/` discovers them dynamically. test_mcp_client.py greps to enforce.
+MERIDIAN_TOOL_NAMES: tuple[str, ...] = (
+    "list_products",
+    "get_product",
+    "search_products",
+    "get_customer",
+    "verify_customer_pin",
+    "list_orders",
+    "get_order",
+    "create_order",
+)
 
-get_settings.cache_clear()
+
+class _PermissiveArgs(BaseModel):
+    """Args schema for stub tools: accept any kwargs without validation."""
+
+    model_config = ConfigDict(extra="allow")
 
 
 class FakeAgentModel(FakeMessagesListChatModel):
-    """FakeMessagesListChatModel with two test-friendly tweaks:
+    """FakeMessagesListChatModel with two test-friendly tweaks.
 
     * `bind_tools` is a no-op (returns self) so `create_agent` accepts it.
-    * `_generate` walks the response list linearly without cycling — that lets
-      tests append responses *between* agent turns to inject a dynamic value
-      (e.g. an order_id only known after `place_order` runs).
+    * `_generate` walks the response list linearly without cycling, so tests
+      can append responses *between* agent turns to inject dynamic values
+      (e.g. a customer UUID only known after `verify_customer_pin` runs).
     """
 
     def bind_tools(self, tools: list[Any], **_: Any) -> "FakeAgentModel":  # type: ignore[override]
@@ -73,57 +68,47 @@ class FakeAgentModel(FakeMessagesListChatModel):
         return ChatResult(generations=[ChatGeneration(message=response)])
 
 
-def _wait_until_listening(port: int, timeout: float = 5.0) -> None:
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        try:
-            with socket.create_connection(("127.0.0.1", port), timeout=0.2):
-                return
-        except OSError:
-            time.sleep(0.05)
-    raise RuntimeError(f"MCP test server failed to come up on port {port}")
+def _make_stub(name: str, canned: dict[str, Any]) -> BaseTool:
+    """Build a hermetic stand-in for one MCP tool.
 
+    The stub returns `canned[name]` if the test set it, otherwise echoes the
+    call shape so test failures show why a stubbed call wasn't pre-canned.
+    """
 
-@pytest.fixture(scope="session", autouse=True)
-def mcp_test_server() -> Iterator[None]:
-    """Start the Acme MCP server in-thread for the duration of the suite."""
-    config = uvicorn.Config(
-        app=mcp_app.streamable_http_app(),
-        host="127.0.0.1",
-        port=_TEST_PORT,
-        log_level="warning",
-        lifespan="on",
+    async def stub(**kwargs: Any) -> Any:
+        if name in canned:
+            return canned[name]
+        return f"[stub:{name}({kwargs})]"
+
+    return StructuredTool(
+        name=name,
+        description=f"Stubbed {name} (test-only).",
+        args_schema=_PermissiveArgs,
+        coroutine=stub,
     )
-    server = uvicorn.Server(config)
-    thread = threading.Thread(target=server.run, name="mcp-test-server", daemon=True)
-    thread.start()
-    _wait_until_listening(_TEST_PORT)
-    yield
-    server.should_exit = True
-    thread.join(timeout=5)
-
-
-@pytest.fixture(autouse=True)
-def reset_mcp_state() -> Iterator[None]:
-    """Reset Acme inventory + orders before every test."""
-    mcp_data.reset_state()
-    yield
-    mcp_data.reset_state()
 
 
 @pytest.fixture
-async def mcp_tools() -> list[Any]:
-    """Discover MCP tools via the real client. One connection per test."""
+def mock_tools() -> tuple[list[BaseTool], dict[str, Any]]:
+    """Per-test stub tool list + a writable canned-responses dict.
+
+    Usage:
+        def test_something(mock_tools):
+            tools, canned = mock_tools
+            canned["verify_customer_pin"] = "Verified — UUID abc-123"
+    """
+    canned: dict[str, Any] = {}
+    tools = [_make_stub(name, canned) for name in MERIDIAN_TOOL_NAMES]
+    return tools, canned
+
+
+@pytest.fixture(scope="session")
+async def mcp_tools_real() -> list[BaseTool]:
+    """Discover tools from the hosted Meridian MCP. Read-only; session-scoped."""
     from app.mcp_client import MCPClientHolder
 
     holder = MCPClientHolder()
-    tools = await holder.connect()
-    return tools
-
-
-def make_fake(messages: list[BaseMessage]) -> FakeAgentModel:
-    """Tiny helper used by agent tests to script a turn."""
-    return FakeAgentModel(responses=messages)
+    return await holder.connect()
 
 
 def ai_tool_call(name: str, args: dict[str, Any], call_id: str = "call_1") -> AIMessage:
@@ -139,12 +124,5 @@ def ai_text(text: str) -> AIMessage:
     return AIMessage(content=text)
 
 
-@pytest.fixture
-def tool_names(mcp_tools: list[Any]) -> dict[str, str]:
-    """Map MCP tool names to themselves so tests can reference by intent.
-
-    Test code is allowed to know tool names; the rule is that `app/` doesn't.
-    The mapping makes it explicit which intent each test exercises.
-    """
-    by_name = {t.name: t.name for t in mcp_tools}
-    return by_name
+def make_fake(messages: list[BaseMessage]) -> FakeAgentModel:
+    return FakeAgentModel(responses=messages)

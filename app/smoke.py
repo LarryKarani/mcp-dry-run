@@ -21,7 +21,7 @@ from app.config import configure_logging, get_settings
 from app.mcp_client import MCPClientHolder
 from app.observability import configure_tracing
 
-CANNED_QUERY = "What espresso products do you have?"
+CANNED_QUERY = "What categories of products do you have? Show me a few monitors."
 
 log = logging.getLogger("app.smoke")
 

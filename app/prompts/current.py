@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-PROMPT_VERSION = "v3"
+PROMPT_VERSION = "v1"
 
 _PROMPT_DIR = Path(__file__).parent
 

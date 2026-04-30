@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+tests/.test_credentials.json
 
 # Python
 __pycache__/
