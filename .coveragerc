@@ -1,0 +1,19 @@
+[run]
+source = app
+branch = false
+# These are entry-point shells exercised manually and via the deployed-URL
+# smoke test, not via unit tests:
+#   - smoke.py is a CLI runner ($ python -m app.smoke).
+#   - ui_chainlit.py is Chainlit glue tested via real browser/curl against the
+#     deployed Railway URL during Phase E.
+omit =
+    app/smoke.py
+    app/ui_chainlit.py
+
+[report]
+show_missing = true
+skip_covered = false
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:

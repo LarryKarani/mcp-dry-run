@@ -1,0 +1,51 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Secrets — only the example travels with the image
+.env
+.env.*
+!.env.example
+
+# Test / lint caches
+.pytest_cache
+.ruff_cache
+.mypy_cache
+htmlcov
+.coverage
+.coverage.*
+
+# Editor / OS junk
+.vscode
+.idea
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local Chainlit state
+.chainlit/.lock
+.files/
+
+# Docs / videos / artifacts that don't need to be in the image
+*.log
+*.mov
+*.mp4
+docs/_build/
+
+# Tests aren't needed in the runtime image
+tests/
+.coveragerc
+pytest.ini
+
+# Local docs / planning that don't ship
+DRY_RUN_SCENARIO.md
+VIDEO_CHECKPOINTS.md
+DEPLOYMENT.md
+KICKOFF.md
+prompts_log.md
+docs/

@@ -1,29 +1,30 @@
-# Pinned to versions verified current as of April 2026.
-# If anything breaks on install, loosen these to ranges (>=X.Y) one at a time.
+# Pinned to versions verified working in the dev venv on 2026-04-30.
+# LangChain 1.x ships fast — bump as a deliberate decision, not by accident.
 
-# --- Core agent stack ---
-langchain==0.3.27
-langchain-core==0.3.78
-langchain-openai==0.3.39
-langchain-anthropic==0.3.27
-langgraph==0.6.10
+# Core agent stack (LangChain went 1.x in Oct 2025)
+langchain==1.2.16
+langchain-core==1.3.2
+langchain-openai==1.2.1
+langchain-anthropic==1.4.2
+langgraph==1.1.10
+langgraph-checkpoint==4.0.3
 langchain-mcp-adapters==0.2.2
 
-# --- MCP server ---
-mcp[cli]==1.18.0
+# MCP server
+mcp==1.27.0
 
-# --- Config & validation ---
-pydantic==2.10.4
-pydantic-settings==2.7.1
+# Config & validation
+pydantic==2.13.3
+pydantic-settings==2.14.0
 
-# --- UI ---
+# UI
 chainlit==2.11.1
 
-# --- Observability ---
-langsmith==0.4.41
+# Observability
+langsmith==0.7.38
 
-# --- Dev / test ---
-pytest==8.3.4
-pytest-asyncio==0.25.2
-pytest-cov==6.0.0
-ruff==0.9.0
+# Dev / test
+pytest==9.0.3
+pytest-asyncio==1.3.0
+pytest-cov==7.1.0
+ruff==0.15.12
