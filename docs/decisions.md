@@ -86,8 +86,14 @@ Run `pytest -m eval` to regenerate. The block between the markers below is overw
 <!-- EVAL TABLE START -->
 | Model | Happy-path | Adversarial | Mean latency (s) | Max latency (s) |
 |---|---:|---:|---:|---:|
-| `openai/gpt-4o-mini` | 5/5 | 5/5 | 7.96 | 33.60 |
-| `anthropic/claude-3.5-haiku` | 4/5 | 5/5 | 5.86 | 16.08 |
+| `openai/gpt-4o-mini` | 5/5 | 5/5 | 4.31 | 11.50 |
+| `anthropic/claude-3.5-haiku` | 4/5 | 5/5 | 5.81 | 13.80 |
 <!-- EVAL TABLE END -->
 
-**Decision (filled after eval runs):** which model ships, with the *data → conclusion → choice* chain that VIDEO_CHECKPOINTS calls out as the highest-leverage minute of the final pitch.
+### Run on 2026-04-30 against the canonical 5-happy + 5-adversarial scenario set
+
+**Data.** Both `gpt-4o-mini` and `anthropic/claude-3.5-haiku` are in the brief's cost-effective tier. v1 prompt had mini at 5/5 quality but a 33.6s max-latency outlier on the auth+list-orders multi-tool-call path — uncomfortably above the 8s P95 target. We iterated to v2 with a brevity directive (cap replies at ~4 sentences; show ≤5 list items + offer to expand; surface only status + ID for create/cancel confirmations). Re-running on v2: **mini went from 7.96s mean / 33.6s max → 4.31s / 11.5s with no quality regression**. Haiku showed flat improvement (5.81s mean, 13.8s max) and remained at 4/5 happy.
+
+**Conclusion.** On v2 prompts, mini is both higher quality (5/5 vs 4/5 happy) AND lower latency (4.31s vs 5.81s mean) than haiku in this scenario set. Cost per million tokens is in the same order of magnitude; the latency win is the differentiator users actually feel.
+
+**Choice.** Ship **`openai/gpt-4o-mini` on prompt v2**. The LLM factory (ADR-3) means switching to haiku is one env var if mini's behaviour changes — but on today's data it's a clear pick. The 33.6s → 11.5s max-latency cut is the v1→v2 iteration story to lead with in the final pitch: prompt engineering measured against real data, not vibes.

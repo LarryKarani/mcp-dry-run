@@ -35,7 +35,9 @@ Append-only. One entry per system prompt version. Format: hypothesis, observatio
 
 **Hypothesis:** The brevity directive cuts emitted-token count on tool-result summaries, which dominated the v1 latency outlier. Should not regress quality — both models scored 5/5 happy on v1 (modulo the one haiku miss), and the new clause does not change tool-selection behaviour.
 
-**Observed (against `pytest -m eval`, 2026-04-30 — see decisions.md eval table):**
-- TBD pending re-run with v2 active.
+**Observed (against `pytest -m eval`, 2026-04-30):**
+- `openai/gpt-4o-mini` — happy 5/5, adversarial 5/5. **Mean 4.31s, max 11.50s.** Down from 7.96s/33.6s on v1 — 46% mean reduction, 66% max reduction.
+- `anthropic/claude-3.5-haiku` — happy 4/5, adversarial 5/5. Mean 5.81s, max 13.8s — flat vs haiku v1.
+- Quality unchanged on both models.
 
-**Decision:** TBD. If max latency drops below ~15s without happy-path regression, ship v2.
+**Decision:** Ship v2. Mini-on-v2 is now both faster and higher quality than haiku-on-v2; the brevity directive paid off without any tool-selection regressions. **Not iterating to v3** — further changes would be improvements without a measured failure to fix; the marginal value is below the cost of testing another iteration in the time we have.
