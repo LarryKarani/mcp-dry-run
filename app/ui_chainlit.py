@@ -13,14 +13,23 @@ let the app run, so the deployed URL never serves a hard error page.
 from __future__ import annotations
 
 import logging
+import sys
 import uuid
+from pathlib import Path
 
-import chainlit as cl
+# Chainlit's module loader puts the *file's* directory at the front of sys.path
+# (i.e. .../app), not the project root. Make `from app.… import …` resolvable
+# whether we're run locally (PYTHONPATH=.) or in a container (WORKDIR=/app).
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
-from app.agent import AcmeAgent
-from app.config import configure_logging, get_settings
-from app.mcp_client import MCPClientHolder
-from app.observability import configure_tracing
+import chainlit as cl  # noqa: E402
+
+from app.agent import AcmeAgent  # noqa: E402
+from app.config import configure_logging, get_settings  # noqa: E402
+from app.mcp_client import MCPClientHolder  # noqa: E402
+from app.observability import configure_tracing  # noqa: E402
 
 _AGENT_KEY = "agent"
 _MCP_KEY = "mcp_holder"
