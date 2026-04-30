@@ -15,14 +15,14 @@ from typing import Any
 
 import pytest
 
-from app.agent import AcmeAgent
+from app.agent import SupportAgent
 from app.config import Settings
 from app.mcp_client import MCPClientHolder
 from tests.conftest import FakeAgentModel, ai_text, ai_tool_call
 
 
-def _agent(tools: list[Any], fake: FakeAgentModel, session: str = "edge") -> AcmeAgent:
-    return AcmeAgent(tools=tools, session_id=session, llm=fake)
+def _agent(tools: list[Any], fake: FakeAgentModel, session: str = "edge") -> SupportAgent:
+    return SupportAgent(tools=tools, session_id=session, llm=fake)
 
 
 async def test_e1_empty_message_rejected_without_llm(mock_tools) -> None:

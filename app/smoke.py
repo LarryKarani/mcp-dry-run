@@ -16,7 +16,7 @@ import logging
 import sys
 import uuid
 
-from app.agent import AcmeAgent
+from app.agent import SupportAgent
 from app.config import configure_logging, get_settings
 from app.mcp_client import MCPClientHolder
 from app.observability import configure_tracing
@@ -45,7 +45,7 @@ async def _run() -> int:
         log.error("No tools discovered — server is reachable but exposes nothing.")
         return 3
 
-    agent = AcmeAgent(tools=tools, session_id=str(uuid.uuid4()))
+    agent = SupportAgent(tools=tools, session_id=str(uuid.uuid4()))
     try:
         reply = await agent.ainvoke(CANNED_QUERY)
     except Exception as exc:  # noqa: BLE001 — surface root cause and fail loudly

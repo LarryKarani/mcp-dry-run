@@ -5,7 +5,7 @@ every turn. Built on `langchain.agents.create_agent` (LangChain 1.x) which
 compiles a LangGraph state graph internally — checkpointing, streaming, and
 ReAct-style tool dispatch come for free.
 
-This module knows nothing about Chainlit. Same `AcmeAgent` could power a
+This module knows nothing about Chainlit. Same `SupportAgent` could power a
 FastAPI endpoint, a CLI, or a Slack bot without modification.
 """
 from __future__ import annotations
@@ -42,7 +42,7 @@ class AgentReply:
     reason: str | None = None
 
 
-class AcmeAgent:
+class SupportAgent:
     """A guardrail-wrapped, tool-using agent bound to one user session.
 
     The MCP tools come in pre-discovered from `MCPClientHolder` — this class
@@ -65,7 +65,7 @@ class AcmeAgent:
             checkpointer=self._checkpointer,
         )
         log.info(
-            "AcmeAgent ready: session=%s prompt=%s tools=%d",
+            "SupportAgent ready: session=%s prompt=%s tools=%d",
             session_id, PROMPT_VERSION, len(tools),
         )
 

@@ -23,7 +23,7 @@ from typing import Any, Callable
 
 import pytest
 
-from app.agent import AcmeAgent
+from app.agent import SupportAgent
 from app.config import Settings
 from app.guardrails import looks_like_identity_hijack, looks_like_prompt_leak
 from app.llm import get_llm
@@ -193,7 +193,7 @@ ADVERSARIAL_SCENARIOS: list[tuple[str, str, ScenarioFn]] = [
 # --- Runner ------------------------------------------------------------------
 
 
-async def _run_one(agent: AcmeAgent, message: str, asserter: ScenarioFn, name: str) -> ScenarioResult:
+async def _run_one(agent: SupportAgent, message: str, asserter: ScenarioFn, name: str) -> ScenarioResult:
     started = time.perf_counter()
     try:
         reply = await agent.ainvoke(message)
@@ -227,11 +227,11 @@ async def _eval_model(model: str) -> ModelResult:
     result = ModelResult(model=model)
     try:
         for name, msg, fn in HAPPY_SCENARIOS:
-            agent = AcmeAgent(tools=tools, session_id=f"eval-{model}-{uuid.uuid4().hex[:6]}", llm=llm)
+            agent = SupportAgent(tools=tools, session_id=f"eval-{model}-{uuid.uuid4().hex[:6]}", llm=llm)
             result.happy.append(await _run_one(agent, msg, fn, name))
 
         for name, msg, fn in ADVERSARIAL_SCENARIOS:
-            agent = AcmeAgent(tools=tools, session_id=f"eval-{model}-{uuid.uuid4().hex[:6]}", llm=llm)
+            agent = SupportAgent(tools=tools, session_id=f"eval-{model}-{uuid.uuid4().hex[:6]}", llm=llm)
             result.adversarial.append(await _run_one(agent, msg, fn, name))
     finally:
         await holder.close()

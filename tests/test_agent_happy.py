@@ -2,7 +2,7 @@
 
 Pattern: stub the MCP tools (so we never create real orders during tests),
 script a `FakeAgentModel` with the AIMessages we'd expect from the real LLM
-(tool calls + final responses), wire both into `AcmeAgent`, and assert the
+(tool calls + final responses), wire both into `SupportAgent`, and assert the
 agent's reply text plus that the right stub tool was invoked.
 
 H1 — browse catalogue
@@ -16,12 +16,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.agent import AcmeAgent
+from app.agent import SupportAgent
 from tests.conftest import FakeAgentModel, ai_text, ai_tool_call
 
 
-def _agent(tools: list[Any], fake: FakeAgentModel, session: str = "happy") -> AcmeAgent:
-    return AcmeAgent(tools=tools, session_id=session, llm=fake)
+def _agent(tools: list[Any], fake: FakeAgentModel, session: str = "happy") -> SupportAgent:
+    return SupportAgent(tools=tools, session_id=session, llm=fake)
 
 
 # Helper: the Meridian MCP returns formatted plain text. Tests use realistic

@@ -1,7 +1,7 @@
 """Chainlit chat UI — thin layer, only UI concerns.
 
 Lifecycle:
-  * `on_chat_start` opens an MCP connection + builds an `AcmeAgent`,
+  * `on_chat_start` opens an MCP connection + builds an `SupportAgent`,
     storing both on `cl.user_session` so they live for the chat session.
   * `on_message` routes the user message through the agent (which applies
     the guardrails internally).
@@ -26,7 +26,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import chainlit as cl  # noqa: E402
 
-from app.agent import AcmeAgent  # noqa: E402
+from app.agent import SupportAgent  # noqa: E402
 from app.config import configure_logging, get_settings  # noqa: E402
 from app.mcp_client import MCPClientHolder  # noqa: E402
 from app.observability import configure_tracing  # noqa: E402
@@ -53,7 +53,7 @@ async def on_chat_start() -> None:
         log.exception("MCP connection failed at chat start: %s", exc)
         await cl.Message(
             content=(
-                "I'm having trouble reaching the Acme Coffee catalogue right now. "
+                "I'm having trouble reaching the Meridian catalogue right now. "
                 "Please try again in a minute."
             ),
         ).send()
@@ -61,7 +61,7 @@ async def on_chat_start() -> None:
         cl.user_session.set(_AGENT_KEY, None)
         return
 
-    agent = AcmeAgent(tools=tools, session_id=session_id)
+    agent = SupportAgent(tools=tools, session_id=session_id)
     cl.user_session.set(_MCP_KEY, holder)
     cl.user_session.set(_AGENT_KEY, agent)
 
@@ -69,8 +69,9 @@ async def on_chat_start() -> None:
     log.info("Chat started session=%s tools=[%s]", session_id, tool_names)
     await cl.Message(
         content=(
-            "Hi — I'm the Acme Coffee assistant. I can help you browse the catalogue, "
-            "check stock, place an order, or look up an existing one. What would you like to do?"
+            "Hi — I'm Meridian Electronics' support assistant. I can help you browse the "
+            "catalogue, look up your order history, or place a new order. For anything that "
+            "touches your account, I'll ask for your email and 4-digit PIN. What can I help with?"
         ),
     ).send()
 
@@ -78,7 +79,7 @@ async def on_chat_start() -> None:
 @cl.on_message
 async def on_message(message: cl.Message) -> None:
     """Route the user's message through the guardrail-wrapped agent."""
-    agent: AcmeAgent | None = cl.user_session.get(_AGENT_KEY)
+    agent: SupportAgent | None = cl.user_session.get(_AGENT_KEY)
     if agent is None:
         await cl.Message(
             content="Service is in a degraded state — please refresh to retry.",
