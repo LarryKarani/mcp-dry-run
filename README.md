@@ -2,7 +2,7 @@
 
 A production-ready prototype that consumes Meridian's hosted Model Context Protocol (MCP) server to handle catalogue browsing, customer authentication, order placement, and order history lookup. Built for the AI Engineer assessment.
 
-**Live URL:** `https://<your-chainlit-service>.up.railway.app/`
+**Live URL:** https://mcp-dry-run-production.up.railway.app/
 **MCP server:** `https://order-mcp-74afyau24q-uc.a.run.app/mcp`
 
 ---
@@ -117,7 +117,7 @@ Hosted on Railway via Dockerfile builder (`builder=DOCKERFILE` in `railway.json`
 
 ```bash
 # Smoke test the live URL
-curl -I https://<your-chainlit-service>.up.railway.app/
+curl -I https://mcp-dry-run-production.up.railway.app/
 ```
 
 Required Railway env vars (mirror `.env.example`):
