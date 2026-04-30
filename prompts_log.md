@@ -16,6 +16,26 @@ Append-only. One entry per system prompt version. Format: hypothesis, observatio
 - "Never reveal customer UUID or PIN" — UUIDs are returned by the tool but should not be echoed back to the user verbatim.
 - Standard identity persistence + prompt-secrecy clauses (carried from dry-run experience).
 
-**Observed (against initial happy-path probe):** TBD — will update once Phase B tests run.
+**Observed (against `pytest -m eval`, 2026-04-30):**
+- `openai/gpt-4o-mini` — happy 5/5, adversarial 5/5. **Mean turn latency 7.96s; max 33.6s.** The max-latency outlier was the auth + list-orders chain (two tool calls + a verbose summary).
+- `anthropic/claude-3.5-haiku` — happy 4/5, adversarial 5/5. Mean 5.86s, max 16.1s. Failed one happy-path scenario; faster overall.
+- Live manual test confirmed the auth flow walks correctly end-to-end (customer types credentials → agent verifies → agent lists orders without re-prompting).
 
-**Decision:** Ship as v1; iterate to v2 once we see how the model handles the multi-turn auth scaffold under real LLM (gpt-4o-mini).
+**Decision:** Quality is solid; latency is the issue. Mini's 33.6s outlier is right at SC-6's 8s P95 budget — would feel slow to a customer. Hypothesis: verbose response generation is the dominant cost. Iterate to v2 with explicit brevity rules.
+
+---
+
+## v2 — brevity directive for tool-result summaries (CURRENT)
+**File:** `app/prompts/system_v2.md`
+**Diff vs v1:** added a "Reply length and shape" block:
+- Cap replies at ~4 sentences unless asked for more detail.
+- When summarising lists (products, orders), show at most 5 items + offer to expand.
+- For order create/cancel confirmations, surface only status + ID.
+- Numbers and IDs from tool output verbatim.
+
+**Hypothesis:** The brevity directive cuts emitted-token count on tool-result summaries, which dominated the v1 latency outlier. Should not regress quality — both models scored 5/5 happy on v1 (modulo the one haiku miss), and the new clause does not change tool-selection behaviour.
+
+**Observed (against `pytest -m eval`, 2026-04-30 — see decisions.md eval table):**
+- TBD pending re-run with v2 active.
+
+**Decision:** TBD. If max latency drops below ~15s without happy-path regression, ship v2.

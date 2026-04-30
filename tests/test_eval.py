@@ -34,27 +34,30 @@ pytestmark = pytest.mark.eval
 # Models to compare — both via OpenRouter so the API surface is identical.
 MODELS: list[str] = [
     "openai/gpt-4o-mini",
-    "openai/gpt-4o",
+    "anthropic/claude-3.5-haiku",
 ]
 
 DECISIONS_PATH = Path(__file__).resolve().parents[1] / "docs" / "decisions.md"
 ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 
 
-def _load_real_api_key() -> str | None:
-    """Read OPENROUTER_API_KEY straight from the project .env file.
+def _load_env_value(key: str) -> str | None:
+    """Read one key from the project .env file directly.
 
-    The test conftest sets a placeholder in `os.environ`, which pydantic-settings
-    picks up before the .env file. We bypass that for the eval and read .env
-    directly — keeps the hermetic-test contract intact.
+    The test conftest sets placeholders in `os.environ` for hermeticity; for
+    the eval we need real values, which still live in .env.
     """
     if not ENV_FILE.exists():
         return None
     for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if line.startswith("OPENROUTER_API_KEY="):
+        if line.startswith(f"{key}="):
             return line.split("=", 1)[1].strip().strip('"').strip("'")
     return None
+
+
+def _load_real_api_key() -> str | None:
+    return _load_env_value("OPENROUTER_API_KEY")
 EVAL_START = "<!-- EVAL TABLE START -->"
 EVAL_END = "<!-- EVAL TABLE END -->"
 
@@ -217,7 +220,8 @@ async def _eval_model(model: str) -> ModelResult:
         llm_provider="openrouter",
         llm_model=model,
         openrouter_api_key=api_key,
-        mcp_server_url=os.environ["MCP_SERVER_URL"],
+        mcp_server_url=_load_env_value("MCP_SERVER_URL")
+        or "https://order-mcp-74afyau24q-uc.a.run.app/mcp",
     )
     llm = get_llm(settings)
 
