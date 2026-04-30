@@ -1,12 +1,6 @@
-"""MCP client wrapper.
-
-The ONLY module in the app that knows MCP exists. Tool discovery is dynamic:
-no tool name appears as a string literal anywhere in app/. The LLM decides
-which tool to call based on descriptions surfaced from the server.
-
-This is the architectural choice that lets us swap MCP servers without
-touching agent.py — on bootcamp day, only MCP_SERVER_URL changes.
-"""
+"""MCP client wrapper. Only module in `app/` that imports MCP. Tools are
+discovered dynamically — no tool name is a string literal anywhere in
+`app/` (enforced by `tests/test_mcp_client.py`)."""
 from __future__ import annotations
 
 import logging

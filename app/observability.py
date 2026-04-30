@@ -1,10 +1,6 @@
-"""LangSmith wiring.
-
-LangChain auto-traces if the right env vars are set. We do that in
-`configure_tracing()` so the rest of the app never has to think about it.
-The `traced` helper is a thin re-export of `langsmith.traceable` that
-defaults the metadata to the layer name so traces are filterable in the UI.
-"""
+"""LangSmith wiring. `configure_tracing()` promotes settings into the env vars
+LangChain reads at import. `traced(name, layer)` wraps `langsmith.traceable`
+with a no-op fallback when langsmith isn't importable."""
 from __future__ import annotations
 
 import logging

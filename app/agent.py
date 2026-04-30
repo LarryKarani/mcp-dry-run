@@ -1,13 +1,6 @@
-"""Agent assembly.
-
-Wraps an MCP-aware tool-using agent with the three guardrail layers around
-every turn. Built on `langchain.agents.create_agent` (LangChain 1.x) which
-compiles a LangGraph state graph internally — checkpointing, streaming, and
-ReAct-style tool dispatch come for free.
-
-This module knows nothing about Chainlit. Same `SupportAgent` could power a
-FastAPI endpoint, a CLI, or a Slack bot without modification.
-"""
+"""Tool-using agent built on `langchain.agents.create_agent`, wrapped with the
+three guardrail layers (input validation, system prompt, output validation).
+Holds no MCP or UI knowledge — those live in `mcp_client.py` and `ui_chainlit.py`."""
 from __future__ import annotations
 
 import logging
@@ -104,14 +97,8 @@ class SupportAgent:
 
 
 def _with_error_handling(tools: list[BaseTool]) -> list[BaseTool]:
-    """Make MCP tool errors visible to the LLM as text instead of raising.
-
-    Without this, an `Insufficient stock` error from `place_order` would
-    abort the whole turn — the LLM never gets to paraphrase it for the user.
-    Setting `handle_tool_error=True` converts the exception into a
-    `ToolMessage` the agent can reason about. This is what makes E5 / SC-4
-    actually work.
-    """
+    # Convert tool exceptions into ToolMessages so the LLM can paraphrase
+    # the error to the user instead of the turn aborting.
     for tool in tools:
         tool.handle_tool_error = True
     return tools

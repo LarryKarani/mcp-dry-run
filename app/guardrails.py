@@ -1,19 +1,12 @@
-"""Defense-in-depth guardrails. Pure functions, easy to unit test.
+"""Three-layer defense:
 
-Three layers, each independently testable:
+* L1 (`validate_input`) — length cap, control-char strip, type check; runs before the LLM.
+* L2 — secrecy/scope clauses in the active system prompt (see `prompts/`).
+* L3 (`validate_output`) — blocks prompt leaks, identity hijacks, secret-shaped
+  strings, and tracebacks; replaces with a generic safe message.
 
-* Layer 1 — `validate_input`: clamps length, strips control chars, refuses
-  obviously malformed input BEFORE the LLM ever sees it.
-* Layer 2 — system prompt secrecy clauses live in `prompts/system_v3.md`.
-  This module exposes `looks_like_prompt_leak` so callers can sanity-check.
-* Layer 3 — `validate_output`: blocks outputs that leak the system prompt,
-  claim a different identity, or echo secret-shaped strings. Replaces
-  blocked content with a generic safe message.
-
-The agent wires layers 1 and 3 around every turn. Layer 2 is enforced by
-the prompt itself; the only thing this file does for layer 2 is provide
-the leak detector that backs layer 3.
-"""
+The agent wires L1 + L3 around every turn. This module exposes the L3
+detectors so they can be unit-tested in isolation."""
 from __future__ import annotations
 
 import logging

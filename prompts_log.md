@@ -14,7 +14,7 @@ Append-only. One entry per system prompt version. Format: hypothesis, observatio
 - Out-of-scope refusal block.
 - Auth flow as a 4-step sequence with "do not re-ask, do not invent UUID, do not proceed without one".
 - "Never reveal customer UUID or PIN" — UUIDs are returned by the tool but should not be echoed back to the user verbatim.
-- Standard identity persistence + prompt-secrecy clauses (carried from dry-run experience).
+- Standard identity persistence + prompt-secrecy clauses.
 
 **Observed (against `pytest -m eval`, 2026-04-30):**
 - `openai/gpt-4o-mini` — happy 5/5, adversarial 5/5. **Mean turn latency 7.96s; max 33.6s.** The max-latency outlier was the auth + list-orders chain (two tool calls + a verbose summary).

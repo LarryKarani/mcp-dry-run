@@ -1,9 +1,5 @@
-"""Centralised, validated configuration. Imported by every other module.
-
-Why Pydantic settings: env vars typo'd or missing fail loudly at startup,
-not silently mid-conversation. This is the cheapest production-readiness
-win available — one file, ten minutes, prevents whole classes of bugs.
-"""
+"""Pydantic-validated settings. Loaded once at startup so missing/typo'd env
+vars fail fast instead of silently mid-conversation."""
 from __future__ import annotations
 
 import logging
@@ -24,8 +20,8 @@ class Settings(BaseSettings):
     openrouter_api_key: str | None = None
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
-    openrouter_app_name: str = "mcp-bootcamp-dryrun"
-    openrouter_app_url: str = "https://github.com/yourname/mcp-bootcamp"
+    openrouter_app_name: str = "meridian-support-chatbot"
+    openrouter_app_url: str = "https://github.com/LarryKarani/mcp-dry-run"
 
     # --- MCP ---
     mcp_server_url: str = "http://127.0.0.1:8765/mcp"
@@ -35,7 +31,7 @@ class Settings(BaseSettings):
     # --- Observability (LangSmith) ---
     langchain_tracing_v2: bool = False
     langchain_api_key: str | None = None
-    langchain_project: str = "mcp-bootcamp-dryrun"
+    langchain_project: str = "meridian-support"
 
     # --- Guardrails ---
     max_user_message_chars: int = Field(default=2000, ge=100, le=10000)

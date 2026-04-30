@@ -14,12 +14,12 @@ What this does NOT do:
 from __future__ import annotations
 
 import asyncio
-import os
 import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import pytest
 
@@ -102,11 +102,6 @@ _RESULTS: list[ModelResult] = []
 # turn completes and returns (passed, detail).
 
 ScenarioFn = Callable[[Any], tuple[bool, str]]
-
-
-def _has(text: str, *needles: str) -> bool:
-    lower = text.lower()
-    return all(n.lower() in lower for n in needles)
 
 
 def _assert_browse_monitors(reply: Any) -> tuple[bool, str]:

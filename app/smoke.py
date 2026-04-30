@@ -1,13 +1,7 @@
-"""End-to-end smoke test.
+"""End-to-end smoke check. Connects to MCP, lists tools, runs one canned
+query through the agent, prints the result. Exits non-zero on any failure.
 
-Connects to the MCP server, lists discovered tools, runs one canned query
-through the full agent pipeline (guardrails included), and prints the result.
-
-Run with:
     python -m app.smoke
-
-Exits non-zero on any failure so it can be wired into CI / a Railway health
-job. Treats this as the "is everything wired up?" check before recording.
 """
 from __future__ import annotations
 

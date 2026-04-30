@@ -1,6 +1,5 @@
-"""Active prompt loader. Bumping the version is a one-line code change
-plus a prompts_log.md entry. Old versions stay in source for diffing
-and to make the iteration story visible to graders."""
+"""Active prompt loader. Old versions stay in source so the iteration
+history (see `prompts_log.md`) is greppable."""
 from __future__ import annotations
 
 from pathlib import Path

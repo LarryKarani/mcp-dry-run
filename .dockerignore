@@ -42,10 +42,7 @@ tests/
 .coveragerc
 pytest.ini
 
-# Local docs / planning that don't ship
-DRY_RUN_SCENARIO.md
-VIDEO_CHECKPOINTS.md
-DEPLOYMENT.md
-KICKOFF.md
+# Documentation isn't needed in the runtime image
 prompts_log.md
 docs/
+README.md

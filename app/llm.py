@@ -1,9 +1,5 @@
-"""LLM factory.
-
-Single point where model choice happens. The agent depends on the abstract
-BaseChatModel, not on OpenAI specifically. This is what lets us run the
-eval comparison (Section 3 of CLAUDE.md) by changing one env var.
-"""
+"""LLM factory. Returns a `BaseChatModel`; provider is settings-driven so the
+eval suite can compare models without code changes."""
 from __future__ import annotations
 
 from langchain_core.language_models import BaseChatModel

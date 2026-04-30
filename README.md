@@ -23,8 +23,8 @@ Out of scope by design: returns, refunds, shipping ETAs, account changes, brewin
 ## Quickstart (under 5 minutes)
 
 ```bash
-git clone <this repo>
-cd mcp-bootcamp-dryrun
+git clone https://github.com/LarryKarani/mcp-dry-run.git
+cd mcp-dry-run
 
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt

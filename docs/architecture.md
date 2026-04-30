@@ -70,7 +70,7 @@ Four layers, each independently testable, each with a single concern.
 
 Meridian's MCP returns a **customer UUID** from `verify_customer_pin(email, pin)`. Account-touching tools (`list_orders`, `create_order`) need that UUID. We do *not* store it ourselves — instead, the LangGraph checkpointer keeps the full message history per session, including the AI's previous turn where it received the verify response and learned the UUID. On the next turn the LLM has that context and emits `list_orders(customer_id=<the UUID it remembers>)`.
 
-This is a deliberate design choice: no custom session-state code, no auth middleware, no tokens to manage on our side. The LLM is the one that walks the auth flow, guided by the system prompt's "do not re-ask, do not invent UUIDs, do not proceed without one" clause. If the bootcamp tomorrow added MFA or refresh tokens, they'd hit the prompt and the MCP, not our agent code.
+This is a deliberate design choice: no custom session-state code, no auth middleware, no tokens to manage on our side. The LLM walks the auth flow, guided by the system prompt's "do not re-ask, do not invent UUIDs, do not proceed without one" clause. If MFA or refresh tokens are added later, they hit the prompt and the MCP, not our agent code.
 
 ## Cross-cutting
 

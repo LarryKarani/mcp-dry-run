@@ -54,7 +54,7 @@ class FakeAgentModel(FakeMessagesListChatModel):
       (e.g. a customer UUID only known after `verify_customer_pin` runs).
     """
 
-    def bind_tools(self, tools: list[Any], **_: Any) -> "FakeAgentModel":  # type: ignore[override]
+    def bind_tools(self, tools: list[Any], **_: Any) -> FakeAgentModel:  # type: ignore[override]
         return self
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):  # type: ignore[no-untyped-def, override]

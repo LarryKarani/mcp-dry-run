@@ -1,15 +1,6 @@
-"""Chainlit chat UI — thin layer, only UI concerns.
-
-Lifecycle:
-  * `on_chat_start` opens an MCP connection + builds an `SupportAgent`,
-    storing both on `cl.user_session` so they live for the chat session.
-  * `on_message` routes the user message through the agent (which applies
-    the guardrails internally).
-  * `on_chat_end` closes the MCP connection.
-
-If MCP connection fails at startup we surface a degraded message but still
-let the app run, so the deployed URL never serves a hard error page.
-"""
+"""Chainlit chat UI. Thin shell around `SupportAgent`. MCP connection
+opens on chat start, closes on chat end. MCP failures are caught so
+the deployed URL never serves a hard error page."""
 from __future__ import annotations
 
 import logging
