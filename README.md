@@ -2,6 +2,11 @@
 
 A production-ready prototype that consumes Meridian's hosted Model Context Protocol (MCP) server to handle catalogue browsing, customer authentication, order placement, and order history lookup. Built for the AI Engineer assessment.
 
+<img width="1197" height="899" alt="Screenshot 2026-04-30 at 19 34 49" src="https://github.com/user-attachments/assets/9c92844a-46bb-4f12-aabc-e1664c265cdb" />
+
+
+
+
 **Live URL:** https://mcp-dry-run-production.up.railway.app/
 **MCP server:** `https://order-mcp-74afyau24q-uc.a.run.app/mcp`
 
